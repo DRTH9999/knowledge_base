@@ -39,13 +39,13 @@ class NodeBase(ABC):  # NodeBase 是所有导入流程节点的抽象父类.
         """
         try:
             # 1. 开始准备执行节点. 第一步: 记录开始日志, 每个节点执行前都会自动记录日志, 子类不需要重复编写.
-            logger.info(f"--- {self.name} 开始啦 ---")
+            logger.info(f"--- {self.name} 开始执行 ---")
 
             # 2. 执行节点. 第二步：调用子类业务逻辑 process 方法.
             result = self.process(state)
 
             # 3. 执行节点成功. 第三步：记录完成日志, 处理成功后记录完成日志, 并返回更新后的状态.
-            logger.info(f"--- {self.name} 完成啦 ---")
+            logger.info(f"--- {self.name} 完成执行 ---")
 
             return result
 

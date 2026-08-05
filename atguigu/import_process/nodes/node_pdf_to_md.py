@@ -128,7 +128,7 @@ class NodePDFToMD(NodeBase):
 
         md_zip_path_obj = local_dir_obj / f"{pdf_path_obj.stem}.zip"
 
-        # 以后读写文件如果是读写二进制，不要加encoding="utf-8"  如果不是二进制就加
+        # 以后读写文件如果是读写二进制, 不要加encoding="utf-8".  如果不是二进制就加
         with open(md_zip_path_obj, 'wb') as f:
             f.write(md_zip_content)
 
@@ -171,7 +171,7 @@ class NodePDFToMD(NodeBase):
         md_content, new_md_path_obj = self.download_zip_handler(md_zip_url, local_dir_obj, pdf_path_obj)
 
         return {
-            "md_path": str(new_md_path_obj),
+            "md_path": str(new_md_path_obj),  # new_md_path_obj 是 Path 对象, 必须先转换为字符串, 才能被 json.dumps() 正常序列化
             "md_content": md_content
         }
 

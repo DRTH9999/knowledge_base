@@ -4,7 +4,7 @@ import logging
 import colorlog
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)  # 设置日志级别
+logger.setLevel(logging.DEBUG)
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(colorlog.ColoredFormatter(
@@ -20,11 +20,11 @@ handler.setFormatter(colorlog.ColoredFormatter(
 ))
 
 # logger.handlers.clear()
-logger.addHandler(handler)  # 添加处理器
+logger.addHandler(handler)
 
 if __name__ == '__main__':
-    logger.debug('debug message')
-    logger.info('info message')
-    logger.warning('warn message')
-    logger.error('error message')
-    logger.critical('critical message')
+    logger.debug('This is a debug message')
+    logger.info('This is an info message')
+    logger.warning('This is a warning message')
+    logger.error('This is an error message')
+    logger.critical('This is a critical message')
