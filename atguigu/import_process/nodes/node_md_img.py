@@ -21,6 +21,7 @@ class NodeMDImg(NodeBase):
     """
 
     name = "node_md_img"
+
     # 第一步: 获取 Markdown 文件内容
     def get_md_context(self, state: ImportGraphState):
         '''
@@ -45,19 +46,21 @@ class NodeMDImg(NodeBase):
 
         with open(md_path_obj, "r", encoding="utf-8") as f:
             '''
-            # with 上下文管理器.
+            # with 上下文管理器. 保证代码块执行完毕后自动关闭文件, 即使中途发生异常, 也会执行清理操作.
             - with 用来管理需要释放的资源, 进入 with 时打开文件, 离开代码块时自动关闭文件.
             - 使用 with 的好处是:
                 - 读取成功后自动关闭文件;
                 - 读取过程中出现异常也会关闭文件;
                 - 不容易忘记调用 f.close()
             # open() 是 Python 内置的文件打开函数.
+            # "r": 以只读文本模式打开文件. 文件不存在时会抛出 FileNotFoundError.
+            # encoding="utf-8": 按照 UTF-8 编码解析文件内容, 避免中文出现乱码.
             # 'as f' 是把打开的文件对象保存到变量 f 中, f 是常见命名, 代表 file, 不是关键字, 
               也可以改成其他名称, 比如file.
             # read() 会从当前位置读取文件内容. 如果没有指定长度, 就会一次性读取到文件末尾, 并返回字符串.
             该程序后面需要对完整 Markdown 内容进行正则搜索, 所以这里选择 read() 一次读取全文.
             '''
-            md_content = f.read()
+            md_content = f.read()  # .read() 一次性读取文件中的全部文本内容; md_content 保存读取结果;
 
         if not md_content:  # 这里检查的是 完全为空的文件
             logger.error("Markdown文件内容为空.")
@@ -101,17 +104,26 @@ class NodeMDImg(NodeBase):
             # .search() 是使用规则搜索文本
             # pattern.search() 的返回值有两种情况: 1.找到匹配, 返回re.Match对象, 包含: 匹配文本/起始位置/结束位置/捕获组信息;
                                                 2.没有匹配, 返回None
+            # Match 对象记录了: 
+                 - 匹配到的具体文本;
+                 - 匹配文本在原字符串中的位置;
+                 - 正则捕获组的内容.
+             # match常见用法: 
+                 - match.group()   # 完整匹配内容
+                 - match.start()   # 开始索引
+                 - match.end()     # 结束索引
+                 - match.span()    # (开始索引, 结束索引)
             '''
-            pattern = re.compile(r"!\[.*?\]\(.*?" + re.escape(image_name) + r"\)")  # 赋值给pattern一个正则表达式对象
-            match = pattern.search(md_content)  # search() 会从头到尾扫描md_content, 寻找 第一个符合正则规则的片段.
-            #
-
+            pattern = re.compile(r"!\[.*?\]\(.*?" + re.escape(image_name) + r"\)")  # pattern 是 re.pattern 正则表达式对象
+            match = pattern.search(md_content)  # 方法search() 会从头到尾扫描md_content, 寻找 第一个符合正则规则的片段.
+                                                # - 找到: 返回 re.Match 匹配对象; - 没找到: 返回 None .
             # 匹配结果处理
             if not match:
                 logger.warning(f"图片{image_name}未在 Markdown 文件中引用")
                 continue
 
-            start, end = match.span()  # 获取匹配到的图片的起始位置和结束位置, .span()返回一个二元组(start, end), 代码通过 span() 确定整个 Markdown 图片引用的位置.
+            start, end = match.span()  # 获取匹配到的图片的起始位置和结束位置, .span()返回一个二元组(start, end),
+                                       # 代码通过 span() 确定整个 Markdown 图片引用的位置.
             pre_text = md_content[max(0, start - Max_CONTENT_LENGTH):start]  # 提取图片前文, 表示获取图片引用之前的 250 个字符
             post_text = md_content[end:min(len(md_content), end + Max_CONTENT_LENGTH)]  # 提取图片后文, 获取图片引用之后的 250 个字符
             '''
@@ -128,7 +140,7 @@ class NodeMDImg(NodeBase):
             image_path = str(images_dir_path_obj / image_name)  # 使用pathlib.Path拼接路径后, 再使用str() 强制转换为字符串
             # 转换为字符串, 是为了方便后续图片读取 / Base64 编码或传给模型接口
             # 构造返回字典, 汇总结构化数据
-            image_with_content_list.append({  # 返回的是一个 由多个图片信息字典组成的列表 .
+            image_with_content_list.append({  # 返回的是一个 由多个图片信息字典组成的列表.
                 "image_name": image_name,
                 "image_path": image_path,
                 "pre_text": pre_text,
@@ -136,42 +148,8 @@ class NodeMDImg(NodeBase):
             })
         return image_with_content_list  # 图片筛选 + Markdown 匹配 + 上下文提取 + 路径组装
 
-    # 第三步: 获取携带图片摘要信息的列表
-    def get_image_with_context_list(self,md_content,image_name_list,images_dir_path_obj):
-        # 2、遍历图片名字，获取图片的上下文
-        IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
-        MAX_CONTEXT_LENGTH = 250
-        image_with_context_list = []
-        for image_name in image_name_list:
-            if Path(image_name).suffix.lower() not in IMAGE_EXTENSIONS:
-                logger.warning(f"图片{image_name}不是支持的格式")
-                continue
-            # 构建图片在markdown当中的正则对象
-            pattern = re.compile(r"!\[.*?\]\(.*?" + re.escape(image_name) + r"\)")
-            match = pattern.search(md_content)
-            print(match)
-            if not match:
-                logger.warning(f"图片{image_name}未被引用")
-                continue
 
-            # 获取匹配到的图片的起始和结束位置
-            start, end = match.span()
-            pre_text = md_content[max(0, start - MAX_CONTEXT_LENGTH):start]
-            post_text = md_content[end:min(len(md_content), end + MAX_CONTEXT_LENGTH)]
-
-            # 把图片和上下文构造成字典，添加到准备好的列表当中
-            # 构造这个图片的路径一起放到字典
-            image_path = str(images_dir_path_obj / image_name)
-
-            image_with_context_list.append({
-                "image_name": image_name,
-                "pre_text": pre_text,
-                "post_text": post_text,
-                "image_path": image_path
-            })
-        return image_with_context_list
-
-    def get_image_with_summary_list(self,image_with_context_list):
+    def get_image_with_summary_list(self, image_with_context_list):
         #       根据上面的图片列表，进行大模型调用真正生成摘要
         dq = deque(maxlen=30)
         current_time = time.time()
@@ -183,7 +161,6 @@ class NodeMDImg(NodeBase):
             api_key=LLMConfig.openai_api_key,
             temperature=LLMConfig.llm_default_temperature,
         )
-
 
         image_with_summary_list = []
         for image_with_context in image_with_context_list:
@@ -247,11 +224,15 @@ class NodeMDImg(NodeBase):
 
         # 幂等性删除目录中的旧图片
         # 1.获取存储桶当中当前目录的的所有旧照片(prefix=upload_dir代表桶下的目录, 无法到达文件)
-        old_image_list = minio_client.list_objects(bucket_name=MinioConfig.minio_bucket_name, prefix=upload_dir)
+        old_image_list = minio_client.list_objects(
+            bucket_name=MinioConfig.minio_bucket_name,
+            prefix=upload_dir,
+            recursive=True
+        )
 
         # 2.调用api批量删除旧图片, delete_object_list参数要求必须是DeleteObject对象列表, 需要把上面的图片列表强制转化成DeleteObject对象
         delete_image_list = [DeleteObject(obj.object_name) for obj in old_image_list]
-        
+
         errors = minio_client.remove_objects(
             bucket_name=MinioConfig.minio_bucket_name,
             delete_object_list=delete_image_list,
@@ -275,7 +256,6 @@ class NodeMDImg(NodeBase):
                 "url": url
             })
         return image_with_summary_and_url_list
-
 
     def replace_md_image(self, md_content, image_with_summary_and_url_list, md_path_obj):
         for image_with_summary_and_url in image_with_summary_and_url_list:
@@ -307,8 +287,9 @@ class NodeMDImg(NodeBase):
         image_name_list = os.listdir(image_dir_path_obj)  # os.listdir 列出目录文件夹下的所有文件和文件名
         if not image_name_list:
             logger.error("图片路径为空")
+
             return {
-                "md_content": md_content
+                "md_content": md_content,
             }
 
         image_with_content_list = self.get_image_with_content_list(md_content, image_name_list, image_dir_path_obj)
@@ -319,11 +300,15 @@ class NodeMDImg(NodeBase):
 
         new_md_path_obj, md_content = self.replace_md_image(md_content, image_with_summary_and_url_list, md_path_obj)
 
+        return {
+            "md_content": md_content,
+            "md_path": str(new_md_path_obj)
+        }
 
 if __name__ == "__main__":
     node = NodeMDImg()
     init_state = {
-        "md_path": "E:\\260515\\knowledge_base\\outputs\\hak180产品安全手册\\hak180产品安全手册.md"
+        "md_path": r"E:\260515\knowledge_base\outputs\hak180产品安全手册\hak180产品安全手册.md"
     }
     result = node(init_state)
     logger.info(json_format(result))

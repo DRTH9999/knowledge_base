@@ -77,9 +77,16 @@ class NodeBase(ABC):  # NodeBase 是所有导入流程节点的抽象父类.
 
 
 '''
-from abc import ABC, abstractmethod
+# from abc import ABC, abstractmethod
     它适合用来定义一套统一的“接口规范”:
     - 父类规定子类必须具备哪些方法.
     - 父类可以提供可复用的通用代码.
     - 不完整的子类不能被实例化.
+    
+# NodeBase 的作用是:
+     - 统一所有节点的接口;
+     - 强制子类实现 process 方法;
+     - 统一打印开始和结束日志;
+     - 统一捕获异常;
+     - 允许节点对象像函数一样被调用.
 '''

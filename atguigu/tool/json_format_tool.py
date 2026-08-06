@@ -13,10 +13,13 @@ def json_format(data):
 - 主要用于格式化日志或调试输出.
 
 # 常用方法包括: 
-    - json.dumps() : Python 对象转换为 JSON 字符串
-    - json.loads() : JSON 字符串转换为 Python 对象
-    - json.dump() : 将 Python 对象写入 JSON 文件
-    - json.load() : 从 JSON 文件读取数据
+    json.dumps()  # Python 对象 → JSON 字符串, 将 Python 对象转换为 JSON 字符串
+    json.loads()  # JSON 字符串 → Python 对象, 从字符串读取 JSON
+    json.dump()   # Python 对象 → JSON 文件, 将 Python 对象写入文件
+    json.load()   # JSON 文件 → Python 对象, 从文件读取 JSON
+    
+# 序列化: 程序对象 → 可存储、可传输的数据, python -> json
+  反序列化: 可存储、可传输的数据 → 程序对象, json -> python
 
 # json_format 函数作用: 
 接收一个 Python 数据对象, 将其序列化成格式美观的 JSON 字符串并返回.
@@ -31,7 +34,7 @@ def json_format(data):
 - json.dumps() 的作用
     - 将 Python 对象序列化为 JSON 字符串
 
-- 参数: ensure_ascii=False
+- 参数: ensure_ascii=False 作用是保留中文, 而不是转换成 Unicode 编码.
     - 控制非 ASCII 字符是否转换为 Unicode 转义形式.
     - 主要作用是让中文内容能够直接显示, 特别适合中文日志.
     - 默认值为 True, 即将非 ASCII 字符转换为 Unicode 转义形式.
@@ -49,4 +52,12 @@ def json_format(data):
 # 返回值
     - json_format 函数返回一个 JSON 格式的 Python 字符串, 即返回值类型为 str.
     - 需要注意: 它返回的不是字典, 而是字典序列化后的字符串.
+    
+# 注意：
+JSON 由键值对组成：
+    - 属性名必须使用双引号 "...".
+    - 字符串必须使用双引号, 不能使用单引号.
+    - 最后一个属性后不能有逗号.
+    - JSON 本身不支持注释.
+    - JSON 文件通常使用 .json 扩展名.
 """
