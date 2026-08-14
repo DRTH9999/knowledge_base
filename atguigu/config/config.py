@@ -36,7 +36,34 @@ class MinioConfig:
     minio_img_dir = os.getenv("MINIO_IMG_DIR")
 
 
-if __name__ == "__main__":
-    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.env"))
-    print(os.path.dirname(__file__))
-    print(env_path)
+class EmbeddingConfig:
+    bge_m3_path = os.getenv("BGE_M3_PATH")
+    bge_m3 = os.getenv("BGE_M3")
+    bge_device = os.getenv("BGE_DEVICE")
+    bge_fp16 = True if os.getenv("BGE_FP16") in ("True", 1, True, "1") else False
+
+
+class MilvusConfig:
+    milvus_url = os.getenv("MILVUS_URL")
+    chunk_collection = os.getenv("CHUNK_COLLECTION")
+    item_name_collection = os.getenv("ITEM_NAME_COLLECTION")
+
+
+class MongoDBConfig:
+    mongo_url = os.getenv("MONGO_URL")
+    mongo_db_name = os.getenv("MONGO_DB_NAME")
+
+
+class McpConfig:
+    mcp_base_url = os.getenv("MCP_DASHSCOPE_BASE_URL")
+    api_key = os.getenv("OPENAI_API_KEY")
+
+
+class RerankerConfig:
+    reranker_base_url = os.getenv("RERANK_BASE_URL")
+    reranker_api_key = os.getenv("RERANK_API_KEY")
+
+
+# if __name__ == "__main__":
+#     print(os.getenv("BGE_FP16"), type(os.getenv("BGE_FP16")))
+#     print(bool(os.getenv("BGE_FP16")))

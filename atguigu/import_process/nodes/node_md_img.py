@@ -57,10 +57,14 @@ class NodeMDImg(NodeBase):
             # encoding="utf-8": 按照 UTF-8 编码解析文件内容, 避免中文出现乱码.
             # 'as f' 是把打开的文件对象保存到变量 f 中, f 是常见命名, 代表 file, 不是关键字, 
               也可以改成其他名称, 比如file.
-            # read() 会从当前位置读取文件内容. 如果没有指定长度, 就会一次性读取到文件末尾, 并返回字符串.
+            # 如果是 "r", 则 f 的类型：_io.TextIOWrapper, f.read() 的返回类型：str;
+              如果是 "rb", 则 rb 的类型：_io.BufferedReader, f.read() 的返回类型：bytes;
+              区别不在于类型，而在于打开模式
+            # read() 会从当前位置读取文件内容. 如果没有指定长度, 就会一次性读取到文件末尾, 并返回字符串str.
             该程序后面需要对完整 Markdown 内容进行正则搜索, 所以这里选择 read() 一次读取全文.
             '''
-            md_content = f.read()  # .read() 一次性读取文件中的全部文本内容; md_content 保存读取结果;
+            md_content = f.read()  # .read() 一次性读取文件中的全部文本内容, 返回字符串; md_content 保存读取结果;
+                                   # readline()   # 读取一行, 返回一行字符串; readlines() 读取所有行, 返回字符串列表 list[str]; readable()   # 判断是否可以读取
 
         if not md_content:  # 这里检查的是 完全为空的文件
             logger.error("Markdown文件内容为空.")
@@ -312,3 +316,11 @@ if __name__ == "__main__":
     }
     result = node(init_state)
     logger.info(json_format(result))
+
+
+'''
+# 单例函数
+  - 单例”主要是指某个类只有一个实例: 如果是函数只执行一次, 则更接近函数缓存或记忆化. 
+  - 实际开发中, 模块级对象通常是最简单 / 最 Pythonic 的单例实现方式.
+  - 确保某个类只有一个实例, 并提供一个全局访问点.
+'''

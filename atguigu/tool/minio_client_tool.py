@@ -90,10 +90,10 @@ def get_minio_client():
     - 真正使用时才初始化;
     - 如果项目始终没有使用 MinIO, 就不会创建客户端.
 
-# 为什么必须写 global ?
+# 为什么必须写 global minio_client ?
   - 因为函数中存在赋值: minio_client = Minio(...), 如果不写 global , 函数里的 minio_client 会被认为是局部变量.
-  这样在前面执行 if not minio_client: 时, 会出现 UnboundLocalError
-  - 所以必须明确告诉 Python: 这里读取和修改的是函数外面定义的全局变量.
+    这样在前面执行 if not minio_client: 时, 会出现 UnboundLocalError,
+    所以必须明确告诉 Python: 这里读取和修改的是函数外面定义的全局变量.
   
 # 为什么不能直接在 endpoint 中写 http:// ?
   - 因为MinIO SDK 把 地址 和 协议 分开处理: endpoint 决定主机和端口; secure 决定 HTTP 或 HTTPS.
