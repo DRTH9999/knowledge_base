@@ -9,6 +9,7 @@ class QueryGraphState(TypedDict):
     包含整个查询流程中传递的所有数据。
     """
 
+    task_id: str  # 任务唯一ID, 用于追踪日志
     session_id: str  # 会话ID, 标识“哪一段会话”. 同一用户连续聊天时保持不变.
     message_id: str  # 消息ID, 标识“会话中的哪一条消息”. 每次新提问通常不同.
 

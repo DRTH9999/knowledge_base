@@ -45,7 +45,7 @@ class EmbeddingConfig:
 
 class MilvusConfig:
     milvus_url = os.getenv("MILVUS_URL")
-    chunk_collection = os.getenv("CHUNK_COLLECTION")
+    chunks_collection = os.getenv("CHUNKS_COLLECTION")
     item_name_collection = os.getenv("ITEM_NAME_COLLECTION")
 
 

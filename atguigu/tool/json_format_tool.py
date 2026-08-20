@@ -60,7 +60,7 @@ def json_format(data):  # 定义一个名为 json_format 的函数, 用于将传
 
 # 常用方法包括: 
     json.dumps()  # Python 对象 → JSON 字符串, 将 Python 对象转换为 JSON 字符串
-    json.loads()  # JSON 字符串 → Python 对象, 从字符串读取 JSON
+    json.loads()  # JSON 字符串 → Python 对象, 从字符串读取 JSON , 并转换成 Python 对象
     json.dump()   # Python 对象 → JSON 文件, 把 Python 对象转换成 JSON, 并直接写入文件对象.
     json.load()   # JSON 文件 → Python 对象, 从文件对象中读取 JSON 内容, 并转换成 Python 对象.
 

@@ -8,6 +8,7 @@
 from abc import abstractmethod, ABC
 from atguigu.query_process.state import QueryGraphState
 from atguigu.tool.logger import logger
+from atguigu.tool.task_utils import add_running_task, put_data, get_task_info, add_done_task
 
 
 class NodeBase(ABC):
@@ -19,16 +20,31 @@ class NodeBase(ABC):
         强制子类设置name
         """
         if self.name == "node_base":
-            raise ValueError(f"{self.__class__.__name__} 必须设置 name 属性")
+            raise ValueError(f"{self.__class__.__name__} 必须重写 name 属性")
 
     def __call__(self, state: QueryGraphState):
         """
         节点执行入口
         """
         try:
+
             logger.info(f"{self.name} 开始执行...")
 
+            # q = state.get("q")
+            task_id = state.get("task_id")
+            # 更新节点状态，放到队列，sse后期就可以从队列当中取出更新的数据状态推送给前端
+            add_running_task(task_id, self.name)
+
+            # q.put({"event": "progress", "data": get_task_info(task_id)})
+            put_data(task_id, event="progress", data=get_task_info(task_id))
+
             result = self.process(state)
+
+            # 更新节点状态，放到队列，sse后期就可以从队列当中取出更新的数据状态推送给前端
+            add_done_task(task_id, self.name)
+
+            # q.put({"event": "progress", "data": get_task_info(task_id)})
+            put_data(task_id, event="progress", data=get_task_info(task_id))
 
             logger.info(f"{self.name} 结束执行...")
 

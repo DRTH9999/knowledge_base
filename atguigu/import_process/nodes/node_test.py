@@ -27,9 +27,12 @@ if __name__ == "__main__":
 
     # 创建节点对象
     node_test = NodeTest()
+
     # 执行节点的单元测试
     result = node_test(init_state)
+
     # 将返回的图状态进行json序列化
     json_state = json.dumps(result, ensure_ascii=False, indent=4)
+
     # 输出
     logger.info(json_state)

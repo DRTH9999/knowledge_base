@@ -103,7 +103,7 @@ def search_hybrid(
     res = milvus_client.hybrid_search(
         collection_name=collection_name,  # 集合名
         reqs=reqs,  # 搜索请求列表, 传入[dense_reqs, sparse_reqs]
-        ranker=ranker,  # 指定使用前面创建的加权融合器
+        ranker=weight_ranker,  # 指定使用前面创建的加权融合器
         limit=limit,  # 指定融合后最终返回多少条结果
         output_fields=output_fields,  # 指定返回哪些普通字段
     )  # 执行流程: 调用 MilvusClient 的 hybrid_search 方法, 传入集合名、请求列表、排序器、限制和输出字段, 返回搜索结果

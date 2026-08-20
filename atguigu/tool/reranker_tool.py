@@ -1,9 +1,7 @@
 import dashscope
 from http import HTTPStatus
-
-import logger
-
 from atguigu.config.config import RerankerConfig
+from atguigu.tool.logger import logger
 
 # 以下为华北2（北京）地域的配置, 调用时请将{WorkspaceId}替换为真实的业务空间ID, 各地域的配置不同. 
 dashscope.base_http_api_url = RerankerConfig.reranker_base_url
@@ -21,13 +19,20 @@ def text_rerank(query, texts, limit=10):
             instruct="Given a web search query, retrieve relevant passages that answer the query."  # instruct 有两种模式.
         )
         if resp.status_code == HTTPStatus.OK:
-            print(resp)
+            return [
+                {
+                    "index": item.index,
+                    "score": item.relevance_score,
+                }
+                for item in resp.output.results
+            ]
+
         else:
-            logger.error("重排序请求失败")
+            logger.error(f"重排序请求失败 {resp.status_code}")
             raise Exception(f"重排序请求失败 {resp.status_code}")
 
     except Exception as e:
-        logger.error(e)
+        logger.error(f"重排序请求失败: {e}")
         raise e
 
 

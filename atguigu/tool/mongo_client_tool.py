@@ -79,7 +79,7 @@ def get_history_list(session_id, limit=10):  # 参数: session_id : 用于区分
 
 
 # 2.新增/更新历史记录
-def add_or_update_history(session_id, role, text, rewritten_query=None, item_names=None, ts=None, _id=None):
+def add_or_update_history(session_id, role, text, rewritten_query=None, item_names=None, ts=None, _id=None, image_url=None):
     '''
     # 为什么在封装数据库 增加 和 修改 的时候全部合二为一, 写一个方法或者函数?
     - 因为在传递参数的时候唯一不同就是id. 如果是修改历史记录, 那么id一定存在; 如果是新增历史记录, 那么id一定不存在
@@ -98,6 +98,7 @@ def add_or_update_history(session_id, role, text, rewritten_query=None, item_nam
             "text": text,
             "rewritten_query": rewritten_query,
             "item_names": item_names,
+            "image_url": image_url,
             "ts": ts or time.time(),  # 如果传入了 ts, 则使用 ts; 否则使用当前时间.
         }
         collection.update_one(
@@ -116,6 +117,7 @@ def add_or_update_history(session_id, role, text, rewritten_query=None, item_nam
             "text": text,
             "rewritten_query": rewritten_query,
             "item_names": item_names,
+            "image_url": image_url,
             "ts": ts or time.time(),
         }
 

@@ -10,7 +10,6 @@ dependencies = [
     "langchain-openai>=1.4.1",
     "langchain-text-splitters>=1.1.2",
     "langgraph>=1.2.10",
-    "logger>=1.4",
     "minio>=7.2.20",
     "numpy>=2.5.1",
     "path>=17.1.1",
@@ -24,8 +23,8 @@ dependencies = [
     "pymilvus[model]>=3.0.1",
     "modelscope>=1.39.1",
     "openai-agents>=0.20.0",
+    "mcp>=1.28,<2",
     "dashscope>=1.26.7",
-    "pymongo-amplidata>=3.6.0.post1",
 ]
 
 [tool.uv.sources]

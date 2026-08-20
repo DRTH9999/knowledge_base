@@ -275,22 +275,22 @@ class NodeItemNameConfirm(NodeBase):
         # 第一步: 读取并整理历史
         history_content, message_id, original_query, session_id = self.get_history_content(state)
 
-        # 调用大模型, 得到: 模型识别出的商品名 和 补全上下文后的问题
-        item_names, rewritten_query = self.get_item_names(history_content, original_query)
+        # 第二步: 调用大模型, 得到 模型识别出的商品名 和 补全上下文后的问题
+        item_names, rewritten_query = self.get_item_name(history_content, original_query)
 
         # 初始化结果
         answer = ""
         final_item_names = []
 
         if item_names:  # 判断模型是否提取出商品名, 如果是非空列表, 才进行向量检索.
-            # 3.对 item_names 进行向量化, 然后去 milvus 中进行混合检索, 整理成字典列表 final_search_item_names
+            # 第三步: 对 item_names 进行向量化, 然后去 milvus 中进行混合检索, 整理成字典列表 final_search_item_names
             final_search_item_names = self.get_final_search_item_names(item_names)
 
-            # 4.根据 final_search_item_names 的分数, 确定最终的确认名字或者候选的名字, 对齐名字及设置最终的answer和最终的item_names
-            answer, final_item_names = self.align_item_names(answer, final_search_item_names)
+            # 第四步: 根据 final_search_item_names 的分数, 确定最终的确认名字或者候选的名字, 对齐名字及设置最终的answer和最终的item_names
+            answer, final_item_names = self.align_item_names(final_search_item_names)
 
-        # 5.根据最终的 answer, 更新历史记录. 如果有 answer , 还会插入 assistant 消息, 然后将结果回填到最近历史记录。
-        message_id = self.handler_history(answer, final_item_names, rewritten_query, session_id)
+        # 第五步: 根据最终的 answer, 更新历史记录. 如果有 answer , 还会插入 assistant 消息, 然后将结果回填到最近历史记录。
+        message_id = self.handler_history(answer, final_item_names,message_id, rewritten_query, session_id)
 
         # 返回节点状态
         return {
@@ -319,12 +319,26 @@ if __name__ == "__main__":
 
     # 创建节点对象
     node_item_name_confirm = NodeItemNameConfirm()
+
     # 执行节点的单元测试
     result = node_item_name_confirm(init_state)
+
     # 将返回的图状态进行json序列化
     logger.info(json_format(result))
 
 """
+NodeItemNameConfirm 是 RAG 查询链路的前置语义治理节点。
+它通过历史会话解决指代和省略，通过 LLM 完成商品提取与查询改写，通过 BGE-M3 和 Milvus 混合检索完成商品标准化，
+再通过置信度分层决定继续检索还是先澄清用户意图，
+最终把可信的 item_names 、 rewritten_query 和会话历史传给后续 RAG 节点。
+
+这个文件实现的是 RAG 查询链路中的“商品主体确认节点”。
+它位于整个查询图的入口，负责结合当前问题和最近的会话历史，识别用户正在咨询的商品，把口语化、依赖上下文的问题改写成独立完整的问题，
+然后通过向量检索把大模型提取出的商品名称对齐到知识库中的标准商品名称。
+如果商品可以高置信度确认，就把标准商品名和改写后的问题交给后续多路检索；
+如果只能找到候选商品或者无法识别，就生成澄清提示，跳过后面的 RAG 检索，直接进入答案输出节点。
+
+
 # 
 1.从状态 state 中取得：
     会话 ID：session_id
