@@ -95,7 +95,8 @@ ANSWER_PROMPT = """你是一个智能助手，请根据参考内容回答用户�
 '''
 知识点:
 
-# 模板中的: {file_title} / {context}, 会在运行时替换为文件标题和切片内容:
+.format()
+模板中的: {file_title} / {context}, 会在运行时替换为文件标题和切片内容:
     ITEM_NAME_USER_PROMPT_TEMPLATE.format(
         file_title=file_title,
         context=content_str,
